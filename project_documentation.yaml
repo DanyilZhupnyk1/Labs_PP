@@ -1,0 +1,526 @@
+openapi: 3.0.3
+info:
+  title: World of Auditoriums
+  description: Your ultimate marketplace for reserving an auditorium of any kind for your lecttures, debates, events or whatever you desire.
+  version: 0.0.1
+  
+servers:
+    - url: https://localhost/api/v1
+    
+tags:
+  - name: Auditorium
+    description: The main instance of the project
+  - name: User
+    description: The instace for managing our users and also admins
+  - name: Order
+    description: Contains all necessary info about deals
+    
+paths:
+  /auditorium:
+    post:
+      tags: 
+        - Auditorium
+      summary: Register new auditorium
+      description: This can only be done by the admin
+      operationId: create_auditorium
+      requestBody:
+        description: Creates auditorium
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/AuditoriumToCreate'
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/AuditoriumInfo'
+        '400':
+          description: validation error
+          
+  /auditorium/{auditorium_id}:
+    put:
+      tags: 
+        - Auditorium
+      summary: Chanche some info about existing auditorium
+      description: This can only be done by the admin
+      operationId: upd_auditorium
+      parameters:
+        - name: auditorium_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      requestBody:
+        description: Updates auditorium
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuditoriumToUpdate'
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/AuditoriumInfo'
+        '400':
+          description: validation error
+        '404':
+          description: not found
+          
+    get:
+      tags: 
+        - Auditorium
+      summary: Returns latest info about the auditorium
+      description: This is a public method
+      operationId: get_auditorium
+      parameters:
+        - name: auditorium_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/AuditoriumInfo'
+        '404':
+          description: not found
+    delete: 
+      tags: 
+        - Auditorium
+      summary: Delete the auditorium from our database
+      description: This can only be done by the admin
+      operationId: delete_auditorium
+      parameters:
+        - name: auditorium_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: succes
+        '404':
+          description: not found
+  /user:
+    post:
+      tags: 
+        - User
+      summary: Register new user
+      description: Create new account
+      operationId: create_user
+      requestBody:
+        description: Creates user
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/UserToCreate'
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/UserInfo'
+        '400':
+          description: validation error
+          
+  /user/{user_id}:
+    put:
+      tags: 
+        - User
+      summary: Chanche some info about existing user
+      description: This can only be done by the user himself
+      operationId: upd_user
+      parameters:
+        - name: user_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      requestBody:
+        description: Updates auditorium
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserToUpdate'
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/UserInfo'
+        '400':
+          description: validation error
+        '404':
+          description: not found
+          
+    get:
+      tags: 
+        - User
+      summary: Returns latest info about the user
+      description: This is a public method
+      operationId: get_user
+      parameters:
+        - name: user_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/UserInfo'
+        '404':
+          description: not found
+    
+    delete: 
+      tags: 
+        - User
+      summary: Delete the user from our database
+      description: This can only be done by the admin
+      operationId: delete_user
+      parameters:
+        - name: user_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: succes
+        '404':
+          description: not found
+  
+  /user/{user_id}/orders:
+    get:
+      tags: 
+        - User
+      summary: Returns orders made by the user
+      description: This can only be done for the user himself
+      operationId: get_user_orders
+      parameters:
+        - name: user_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/ArrayOfOrders'
+        '404':
+          description: not found
+          
+  /order:
+    post:
+      tags: 
+        - Order
+      summary: Register new order
+      description: Create new account
+      operationId: create_order
+      requestBody:
+        description: Creates order
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/OrderToCreate'
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/OrderInfo'
+        '400':
+          description: validation error
+          
+  /order/{order_id}:
+    put:
+      tags: 
+        - Order
+      summary: Chanche some info about existing order
+      description: Update the order
+      operationId: upd_order
+      parameters:
+        - name: order_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      requestBody:
+        description: Updates order
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderToUpdate'
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/OrderInfo'
+        '400':
+          description: validation error
+        '404':
+          description: not found
+          
+    get:
+      tags: 
+        - Order
+      summary: Returns latest info about the order
+      description: This is a public method
+      operationId: get_order
+      parameters:
+        - name: order_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: success
+          content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/OrderInfo'
+        '404':
+          description: not found
+    delete: 
+      tags: 
+        - Order
+      summary: Delete the order from our database
+      description: This can only be done by the admin
+      operationId: delete_order
+      parameters:
+        - name: order_id
+          in: path
+          description: Primary key for the object
+          required: true
+          style: simple
+          explode: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: succes
+        '404':
+          description: not found
+components:
+  schemas:
+    AuditoriumToCreate:
+      required:
+      - seats
+      - address
+      - price_per_hour
+      type: object
+      properties:
+        seats:
+          type: integer
+          format: int64
+          example: 55
+        address:
+          type: string
+          example: Shevchenka st, 1
+        price_per_hour:
+          type: number
+          format: float32
+          example: 10.2
+          
+    AuditoriumInfo:
+      type: object
+      properties:
+        auditorium_id:
+          type: integer
+          format: int64
+          example: 55
+        seats:
+          type: integer
+          format: int64
+          example: 55
+        address:
+          type: string
+          example: Shevchenka st, 1
+        price_per_hour:
+          type: number
+          format: float32
+          example: 10.2
+          
+    AuditoriumToUpdate:
+      type: object
+      properties:
+        price_per_hour:
+          type: number
+          format: float32
+          example: 10.2
+          
+    UserToCreate:
+      type: object
+      properties:
+        name:
+          type: string
+          format: int64
+          example: Volodymyr
+        surname:
+          type: string
+          format: int64
+          example: Shymanskyi
+        email:
+          type: string
+          format: int64
+          example: Volodymyr.Shymanskyi@email.nulp
+        password:
+          type: string
+          format: int64
+          example: 1
+        
+        
+    UserInfo:
+      type: object
+      properties:
+        auditorium_id:
+          type: integer
+          format: int64
+          example: 55
+        name:
+          type: string
+          format: int64
+          example: Volodymyr
+        surname:
+          type: string
+          format: int64
+          example: Shymanskyi
+        email:
+          type: string
+          format: int64
+          example: Volodymyr.Shymanskyi@email.nulp
+          
+    UserToUpdate:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Volodymyr
+        surname:
+          type: string
+          example: Shymanskyi
+        password:
+          type: string
+          format: int64
+          example: 1
+          
+    OrderToCreate:
+      type: object
+      properties:
+        user_id:
+          type: integer
+          format: int64
+          example: 1
+        auditorium_id:
+          type: integer
+          format: int64
+          example: 1
+        reservation_start:
+          type: string
+          format: date-time
+          example: '2023-01-01 10:10:10'
+        hours_orered:
+          type: integer
+          format: int64
+          example: 2
+          
+    OrderInfo:
+      type: object
+      properties:
+        order_id:
+          type: integer
+          format: int64
+          example: 1
+        user_id:
+          type: integer
+          format: int64
+          example: 1
+        auditorium_id:
+          type: integer
+          format: int64
+          example: 1
+        reservation_start:
+          type: string
+          format: date-time
+          example: '2023-01-01 10:10:10'
+        hours_orered:
+          type: integer
+          format: int64
+          example: 2
+    
+    OrderToUpdate:
+      type: object
+      properties:
+        auditorium_id:
+          type: integer
+          format: int64
+          example: 1
+        reservation_start:
+          type: string
+          format: date-time
+          example: '2023-01-01 10:10:10'
+        hours_orered:
+          type: integer
+          format: int64
+          example: 2
+    
+    ArrayOfOrders:
+      type: array
+      items:
+        $ref: '#/components/schemas/OrderInfo'
+    
+  securitySchemes:
+    user_auth:
+      type: http
+      scheme: Basic
+        
+    admin_auth:
+      type: http
+      scheme: Basic
+      
