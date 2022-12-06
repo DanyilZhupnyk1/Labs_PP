@@ -1,0 +1,21 @@
+[tool.poetry]
+name = "labs-pp"
+version = "0.1.0"
+description = ""
+authors = ["'Danyil <'danyil.zhupnyk.kn.2022@lpnu.ua'>"]
+readme = "README.md"
+packages = [{include = "labs_pp"}]
+
+[tool.poetry.dependencies]
+python = "^3.10.7"
+flask = "^2.2.2"
+mysqlclient = "^2.1.1"
+waitress = "^2.1.2"
+alembic = "^1.8.1"
+sqlalchemy = "^1.4.44"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
