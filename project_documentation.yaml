@@ -38,6 +38,8 @@ paths:
                   $ref: '#/components/schemas/AuditoriumInfo'
         '400':
           description: validation error
+      security:
+        - admin_auth: []
           
   /auditorium/{auditorium_id}:
     put:
@@ -72,6 +74,8 @@ paths:
           description: validation error
         '404':
           description: not found
+      security:
+        - admin_auth: []
           
     get:
       tags: 
@@ -97,6 +101,9 @@ paths:
                   $ref: '#/components/schemas/AuditoriumInfo'
         '404':
           description: not found
+      security:
+        - admin_auth: []
+          
     delete: 
       tags: 
         - Auditorium
@@ -117,6 +124,8 @@ paths:
           description: succes
         '404':
           description: not found
+      security:
+        - admin_auth: []
   /user:
     post:
       tags: 
@@ -173,6 +182,8 @@ paths:
           description: validation error
         '404':
           description: not found
+      security:
+        - user_auth: []
           
     get:
       tags: 
@@ -219,6 +230,8 @@ paths:
           description: succes
         '404':
           description: not found
+      security:
+        - user_auth: []
   
   /user/{user_id}/orders:
     get:
@@ -245,6 +258,8 @@ paths:
                   $ref: '#/components/schemas/ArrayOfOrders'
         '404':
           description: not found
+      security:
+        - user_auth: []
           
   /order:
     post:
@@ -268,6 +283,8 @@ paths:
                   $ref: '#/components/schemas/OrderInfo'
         '400':
           description: validation error
+      security:
+        - user_auth: []
           
   /order/{order_id}:
     put:
@@ -302,6 +319,8 @@ paths:
           description: validation error
         '404':
           description: not found
+      security:
+        - user_auth: []
           
     get:
       tags: 
@@ -327,6 +346,9 @@ paths:
                   $ref: '#/components/schemas/OrderInfo'
         '404':
           description: not found
+      security:
+        - user_auth: []
+          
     delete: 
       tags: 
         - Order
@@ -347,6 +369,8 @@ paths:
           description: succes
         '404':
           description: not found
+      security:
+        - user_auth: []
 components:
   schemas:
     AuditoriumToCreate:
