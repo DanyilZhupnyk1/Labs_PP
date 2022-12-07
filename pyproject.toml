@@ -13,6 +13,8 @@ mysqlclient = "^2.1.1"
 waitress = "^2.1.2"
 alembic = "^1.8.1"
 sqlalchemy = "^1.4.44"
+marshmallow = "^3.19.0"
+flask-bcrypt = "^1.0.1"
 
 
 [build-system]
