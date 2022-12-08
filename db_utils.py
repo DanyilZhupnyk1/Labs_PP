@@ -15,6 +15,11 @@ def get_entry_byid(model_class, uid, **kwargs):
     return session.query(model_class).filter_by(id=uid, **kwargs).one()
 
 
+def get_entries_byid(model_class, key, uid, **kwargs):
+    session = Session()
+    return session.query(model_class).filter(key == uid, **kwargs).all()
+
+
 def update_entry(entry, *, commit=True, **kwargs):
     session = Session()
     for key, value in kwargs.items():

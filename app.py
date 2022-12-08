@@ -109,6 +109,14 @@ def delete_user(user_id):
         return jsonify({"Error": "not found"}), 404
 
 
+@app.route('/user/<int:user_id>/orders', methods=["GET"])
+def get_user_orders(user_id):
+    try:
+        user_orders = db_utils.get_entries_byid(Order, Order.user_id, user_id)
+        return jsonify(OrderInfo().dump(user_orders, many=True))
+    except exc.NoResultFound:
+        return jsonify({"Error": "not found"}), 404
+
 ########################################################################
 # Order
 @app.route('/order', methods=["POST"])
