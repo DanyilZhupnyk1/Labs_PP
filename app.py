@@ -6,13 +6,37 @@ from models import *
 from schemas import *
 import db_utils
 from validations import validate_order_time
+from flask_httpauth import HTTPBasicAuth
+from flask_bcrypt import check_password_hash
 
 app = Flask(__name__)
+auth = HTTPBasicAuth()
+
+
+@auth.verify_password
+def verify_password(email, password):
+    try:
+        user = Session.query(User).filter_by(email=email).one()
+        if check_password_hash(user.password, password):
+            return email
+
+    except exc.NoResultFound:
+        return False
+
+
+@auth.get_user_roles
+def get_user_roles(email):
+    try:
+        user = Session.query(User).filter_by(email=email).one()
+        return user.role
+    except exc.NoResultFound:
+        return ''
 
 
 ########################################################################
 # Auditorium
 @app.route('/auditorium', methods=["POST"])
+@auth.login_required(role='admin')
 def create_auditorium():
     try:
         new_auditorium = AuditoriumToCreate().load(request.json)
@@ -24,9 +48,10 @@ def create_auditorium():
 
 
 @app.route('/auditorium/<int:auditorium_id>', methods=["PUT"])
+@auth.login_required(role='admin')
 def upd_auditorium(auditorium_id):
     """
-    user only alowed to update price_per_hour basicaly
+    user only alowed to update price_per_hour
     """
     try:
         auditorium_data = AuditoriumToUpdate().load(request.json)
@@ -42,6 +67,7 @@ def upd_auditorium(auditorium_id):
 
 
 @app.route('/auditorium/<int:auditorium_id>', methods=["GET"])
+@auth.login_required(role='admin')
 def get_auditorium(auditorium_id):
     try:
         auditorium = db_utils.get_entry_byid(Auditorium, auditorium_id)
@@ -52,6 +78,7 @@ def get_auditorium(auditorium_id):
 
 
 @app.route('/auditorium/<int:auditorium_id>', methods=["DELETE"])
+@auth.login_required(role='admin')
 def delete_auditorium(auditorium_id):
     try:
         auditorium = db_utils.get_entry_byid(Auditorium, auditorium_id)
@@ -75,10 +102,13 @@ def create_user():
 
 
 @app.route('/user/<int:user_id>', methods=["PUT"])
+@auth.login_required()
 def upd_user(user_id):
     try:
         user_data = UserToUpdate().load(request.json)
         user = db_utils.get_entry_byid(User, user_id)
+        if auth.current_user() != user.email:
+            return 'Unauthorized Access', 401
         db_utils.update_entry(user, **user_data)
         return jsonify({"Succes": 200})
 
@@ -90,9 +120,13 @@ def upd_user(user_id):
 
 
 @app.route('/user/<int:user_id>', methods=["GET"])
+@auth.login_required()
 def get_user(user_id):
     try:
         user = db_utils.get_entry_byid(User, user_id)
+        if auth.current_user() != user.email:
+            return 'Unauthorized Access', 401
+
         return jsonify(UserInfo().dump(user)), 200
 
     except exc.NoResultFound:
@@ -100,9 +134,12 @@ def get_user(user_id):
 
 
 @app.route('/user/<int:user_id>', methods=["DELETE"])
+@auth.login_required()
 def delete_user(user_id):
     try:
         user = db_utils.get_entry_byid(User, user_id)
+        if auth.current_user() != user.email:
+            return 'Unauthorized Access', 401
         db_utils.delete_entry(User, user_id)
         return jsonify({"Succes": "unit deleted"}), 200
     except exc.NoResultFound:
@@ -110,16 +147,22 @@ def delete_user(user_id):
 
 
 @app.route('/user/<int:user_id>/orders', methods=["GET"])
+@auth.login_required()
 def get_user_orders(user_id):
     try:
         user_orders = db_utils.get_entries_byid(Order, Order.user_id, user_id)
+        user = db_utils.get_entry_byid(User, user_orders[0].user_id)
+        if auth.current_user() != user.email:
+            return 'Unauthorized Access', 401
         return jsonify(OrderInfo().dump(user_orders, many=True))
     except exc.NoResultFound:
         return jsonify({"Error": "not found"}), 404
 
+
 ########################################################################
 # Order
 @app.route('/order', methods=["POST"])
+@auth.login_required()
 def create_order():
     try:
         new_order = OrderToCreate().load(request.json)
@@ -135,12 +178,19 @@ def create_order():
 
 
 @app.route('/order/<int:order_id>', methods=["PUT"])
+@auth.login_required()
 def upd_order(order_id):
     try:
         order_data = OrderToUpdate().load(request.json)
         validate_order_time(order_data['auditorium_id'], order_data['reservation_start'], order_data['hours_ordered'])
         order = db_utils.get_entry_byid(Order, order_id)
+        user = db_utils.get_entry_byid(User, order.user_id)
+
+        if auth.current_user() !=user.email:
+            return 'Unauthorized Access', 401
+
         db_utils.update_entry(order, **order_data)
+
         return jsonify({"Succes": "updated"})
 
     except exc.NoResultFound:
@@ -154,9 +204,15 @@ def upd_order(order_id):
 
 
 @app.route('/order/<int:order_id>', methods=["GET"])
+@auth.login_required()
 def get_order(order_id):
     try:
         order = db_utils.get_entry_byid(Order, order_id)
+        user = db_utils.get_entry_byid(User, order.user_id)
+
+        if auth.current_user() != user.email:
+            return 'Unauthorized Access', 401
+
         return jsonify(OrderInfo().dump(order)), 200
 
     except exc.NoResultFound:
@@ -164,9 +220,14 @@ def get_order(order_id):
 
 
 @app.route('/order/<int:order_id>', methods=["DELETE"])
+@auth.login_required()
 def delete_order(order_id):
     try:
         order = db_utils.get_entry_byid(Order, order_id)
+        user = db_utils.get_entry_byid(User, order.user_id)
+
+        if auth.current_user() != user.email:
+            return 'Unauthorized Access', 401
         db_utils.delete_entry(Order, order_id)
         return jsonify({"Succes": "unit deleted"}), 200
     except exc.NoResultFound:
