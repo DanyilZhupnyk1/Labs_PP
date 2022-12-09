@@ -44,7 +44,7 @@ def create_auditorium():
         return jsonify(AuditoriumToCreate().dump(added_auditorium))
     # !! по якійсь причині не вертає айдішник запису, хз чого
     except ValidationError as err:
-        return str(err), 405
+        return str(err), 400
 
 
 @app.route('/auditorium/<int:auditorium_id>', methods=["PUT"])
@@ -63,7 +63,7 @@ def upd_auditorium(auditorium_id):
         return jsonify({"Error": "not found"}), 404
 
     except ValidationError:
-        return jsonify({"Error": "Invalid input"}), 405
+        return jsonify({"Error": "Invalid input"}), 400
 
 
 @app.route('/auditorium/<int:auditorium_id>', methods=["GET"])
@@ -95,10 +95,10 @@ def create_user():
     try:
         new_user = UserToCreate().load(request.json)
         added_user = db_utils.create_entry(User, **new_user)
-        return jsonify(UserToCreate().dump(added_user))
+        return jsonify(UserToCreate().dump(added_user)), 200
     # !! по якійсь причині не вертає айдішник запису, хз чого
     except ValidationError as err:
-        return str(err), 405
+        return str(err), 400
 
 
 @app.route('/user/<int:user_id>', methods=["PUT"])
@@ -116,7 +116,7 @@ def upd_user(user_id):
         return jsonify({"Error": "not found"}), 404
 
     except ValidationError:
-        return jsonify({"Error": "Invalid input"}), 405
+        return jsonify({"Error": "Invalid input"}), 400
 
 
 @app.route('/user/<int:user_id>', methods=["GET"])
@@ -154,8 +154,11 @@ def get_user_orders(user_id):
         user = db_utils.get_entry_byid(User, user_orders[0].user_id)
         if auth.current_user() != user.email:
             return 'Unauthorized Access', 401
+
         return jsonify(OrderInfo().dump(user_orders, many=True))
     except exc.NoResultFound:
+        return jsonify({"Error": "not found"}), 404
+    except IndexError:
         return jsonify({"Error": "not found"}), 404
 
 
@@ -171,7 +174,7 @@ def create_order():
         return jsonify(OrderToCreate().dump(added_order))
     # !! по якійсь причині не вертає айдішник запису, хз чого
     except ValidationError as err:
-        return str(err), 405
+        return str(err), 400
 
     except exc.IntegrityError as err:
         return str(err), 401
@@ -186,8 +189,8 @@ def upd_order(order_id):
         order = db_utils.get_entry_byid(Order, order_id)
         user = db_utils.get_entry_byid(User, order.user_id)
 
-        if auth.current_user() !=user.email:
-            return 'Unauthorized Access', 401
+        if auth.current_user() != user.email:
+            return 'Uauthorized Access', 401
 
         db_utils.update_entry(order, **order_data)
 
@@ -197,10 +200,10 @@ def upd_order(order_id):
         return jsonify({"Error": "not found"}), 404
 
     except ValidationError as err:
-        return str(err), 405
+        return str(err), 400
 
     except exc.IntegrityError as err:
-        return str(err), 401
+        return str(err), 402
 
 
 @app.route('/order/<int:order_id>', methods=["GET"])
@@ -236,7 +239,7 @@ def delete_order(order_id):
 
 @app.route('/')
 def index():
-    return 'Hello, World 7'
+    return 'Hello, World 7', 200
 
 
 if __name__ == '__main__':
